@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">5UD0KU</string>
+    <string name="title_quit">Exit?</string>
+    <string name="title_victory">Victory!</string>
+    <string name="title_fail">Fail.</string>
+    <string name="title_level">Level:</string>
+
+    <string name="action_new_game">Restart game</string>
+    <string name="action_difficulty">Difficulty level</string>
+
+</resources>

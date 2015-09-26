@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="cell" parent="@android:style/Widget.Button">
+        <item name="android:gravity">center_vertical|center_horizontal</item>
+        <item name="android:textColor">#000</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@drawable/button_selector</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:paddingLeft">@dimen/cell_horizontal_margin</item>
+        <item name="android:paddingRight">@dimen/cell_horizontal_margin</item>
+    </style>
+</resources>

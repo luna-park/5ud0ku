@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="field">#6fff</color>
+    <color name="highlight_bg">#9dc2cf</color>
+    <color name="highlight_text">#c91e1e</color>
+</resources>
