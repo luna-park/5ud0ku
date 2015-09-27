@@ -6,6 +6,6 @@
     <dimen name="cell_horizontal_margin">8dp</dimen>
     <dimen name="cell_vertical_margin">4dp</dimen>
 
-    <dimen name="grid_big">114dp</dimen>
-    <dimen name="grid_small">99dp</dimen>
+    <dimen name="grid_big">60dp</dimen>
+    <dimen name="grid_small">30dp</dimen>
 </resources>

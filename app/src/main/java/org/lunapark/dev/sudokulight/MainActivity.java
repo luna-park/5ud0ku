@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -116,7 +121,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
         switch (item.getItemId()) {
             case R.id.action_difficulty:
-                // TODO Set difficulty level
                 showDifficultyDialog();
                 break;
             case R.id.action_new_game:
@@ -149,7 +153,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         generateSudokuRow(6, 7, 3);
         generateSudokuRow(7, 8, 3);
 
-        // TODO Advanced permutation
+        // Advanced permutation
         for (int i = 0; i < PERMUTATIONS; i++) {
             Log.d("5UD0KU", "PERMUTATION: " + i);
             if (random.nextBoolean()) swapRowsSmall();
@@ -261,9 +265,11 @@ public class MainActivity extends Activity implements Button.OnClickListener {
      * Create game field
      */
     private void createTable() {
+
         // Weight for buttons
         TableRow.LayoutParams params = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         params.weight = 1;
+
 
 
 
@@ -279,13 +285,55 @@ public class MainActivity extends Activity implements Button.OnClickListener {
                     button.setText(" ");
                 }
                 button.setGravity(1);
+
                 button.setOnClickListener(this);
                 button.setTag(CELL_ID + "," + i + j);
                 cells[i][j] = button;
                 tableRow.addView(button, params);
+
             }
             tableLayout.addView(tableRow);
         }
+
+        // TODO Add grid
+
+
+        ShapeDrawable sdBg = new ShapeDrawable(new RectShape());
+        sdBg.getPaint().setColor(getResources().getColor(R.color.field));
+
+        ShapeDrawable sdGrid1 = new ShapeDrawable(new RectShape());
+
+        sdGrid1.getPaint().setColor(Color.BLACK);
+        sdGrid1.getPaint().setStyle(Paint.Style.STROKE);
+        sdGrid1.getPaint().setStrokeWidth(5);
+
+        ShapeDrawable sdGrid2 = new ShapeDrawable(new RectShape());
+
+        sdGrid2.getPaint().setColor(Color.BLACK);
+        sdGrid2.getPaint().setStyle(Paint.Style.STROKE);
+        sdGrid2.getPaint().setStrokeWidth(5);
+
+
+        Drawable[] drawables = {sdBg, sdGrid1, sdGrid2};
+
+        LayerDrawable layerDrawable = new LayerDrawable(drawables);
+
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point point = new Point();
+        display.getSize(point);
+        //display.getMetrics(new DisplayMetrics());
+        int width = point.x;
+        int height = point.y;
+        int w = tableLayout.getWidth();
+        Log.d("SUDOKU", "Display : " + width + "x" + height);
+        int cellHeight = 56;
+        int cellWidth = 49;
+
+        layerDrawable.setLayerInset(1, 2, cellHeight * 3, 2, cellHeight * 3);
+        layerDrawable.setLayerInset(2, cellWidth * 3, 2, cellWidth * 3, 2);
+
+        tableLayout.setBackgroundDrawable(layerDrawable);
     }
 
     private void refreshTable() {
@@ -337,7 +385,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         if (result) {
             // TODO Victory
             new AlertDialog.Builder(this)
-                    .setIcon(R.mipmap.ic_launcher)
+                    .setIcon(android.R.drawable.btn_star_big_on)
                     .setTitle(getString(R.string.app_name))
                     .setMessage(getString(R.string.title_victory))
                     .setPositiveButton(android.R.string.yes,
