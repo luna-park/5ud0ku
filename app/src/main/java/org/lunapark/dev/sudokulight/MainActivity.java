@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -59,6 +60,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private final Random random = new Random(System.currentTimeMillis());
 
     private Animation animation;
+    private int cellWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -266,12 +268,20 @@ public class MainActivity extends Activity implements Button.OnClickListener {
      */
     private void createTable() {
 
-        // Weight for buttons
-        TableRow.LayoutParams params = new TableRow.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        params.weight = 1;
+        Display display = getWindowManager().getDefaultDisplay();
+        // Screen size
+        Point point = new Point();
+        display.getSize(point);
+        // Screen density
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        display.getMetrics(displayMetrics);
 
+        float dpi = displayMetrics.density;
+        float marginX = (getResources().getDimension(R.dimen.activity_horizontal_margin)) * dpi;
+        float width = point.x - marginX;
+        cellWidth = (int) (width / 9);
 
-
+        Log.d("SUDOKU", "Width : " + marginX);
 
         for (int i = 0; i < SIZE; i++) {
             // Add row
@@ -279,6 +289,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             tableRow.setGravity(Gravity.CENTER_HORIZONTAL);
             for (int j = 0; j < SIZE; j++) {
                 Button button = new Button(this);
+
                 if (checkCell(i, j)) {
                     button.setText(String.valueOf(sudoku[i][j]));
                 } else {
@@ -288,16 +299,17 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
                 button.setOnClickListener(this);
                 button.setTag(CELL_ID + "," + i + j);
+                button.setWidth(cellWidth);
+                button.setHeight(cellWidth);
+                button.setGravity(Gravity.CENTER);
                 cells[i][j] = button;
-                tableRow.addView(button, params);
+                tableRow.addView(button);
 
             }
             tableLayout.addView(tableRow);
         }
 
         // TODO Add grid
-
-
         ShapeDrawable sdBg = new ShapeDrawable(new RectShape());
         sdBg.getPaint().setColor(getResources().getColor(R.color.field));
 
@@ -313,25 +325,10 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         sdGrid2.getPaint().setStyle(Paint.Style.STROKE);
         sdGrid2.getPaint().setStrokeWidth(5);
 
-
         Drawable[] drawables = {sdBg, sdGrid1, sdGrid2};
-
         LayerDrawable layerDrawable = new LayerDrawable(drawables);
-
-
-        Display display = getWindowManager().getDefaultDisplay();
-        Point point = new Point();
-        display.getSize(point);
-        //display.getMetrics(new DisplayMetrics());
-        int width = point.x;
-        int height = point.y;
-        int w = tableLayout.getWidth();
-        Log.d("SUDOKU", "Display : " + width + "x" + height);
-        int cellHeight = 56;
-        int cellWidth = 49;
-
-        layerDrawable.setLayerInset(1, 2, cellHeight * 3, 2, cellHeight * 3);
-        layerDrawable.setLayerInset(2, cellWidth * 3, 2, cellWidth * 3, 2);
+        layerDrawable.setLayerInset(1, 0, cellWidth * 3, 0, cellWidth * 3);
+        layerDrawable.setLayerInset(2, cellWidth * 3, 0, cellWidth * 3, 0);
 
         tableLayout.setBackgroundDrawable(layerDrawable);
     }
@@ -353,13 +350,18 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     }
 
     private void createControls() {
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        layoutParams.weight = 1;
+
         for (int i = 0; i < SIZE; i++) {
             Button button = new Button(this);
             button.setText(String.valueOf(i + 1));
             button.setTag(BTN_ID + "," + i);
             button.setOnClickListener(this);
+            button.setHeight(cellWidth);
+            button.setGravity(Gravity.CENTER);
             controls[i] = button;
-            linearLayout.addView(button);
+            linearLayout.addView(button, layoutParams);
         }
         controls[0].setBackgroundResource(R.drawable.button_checked);
 

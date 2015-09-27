@@ -2,33 +2,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:gravity="center_horizontal">
 
     <TableLayout
         android:id="@+id/tlayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="@dimen/cell_horizontal_margin"
-        android:layout_marginRight="@dimen/cell_horizontal_margin"
-        android:layout_weight="1"
-        android:layout_marginTop="@dimen/activity_vertical_margin">
+        android:layout_margin="@dimen/activity_horizontal_margin">
 
     </TableLayout>
-
-    <LinearLayout
-        android:id="@+id/llayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:layout_weight="1">
-
-
-    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
@@ -38,7 +23,18 @@
         android:id="@+id/tvLevel"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:gravity="center_horizontal"
-        android:textStyle="bold"
-        android:layout_weight="1" />
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/llayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin">
+
+
+    </LinearLayout>
 
 </LinearLayout>
