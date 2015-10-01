@@ -20,7 +20,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -42,8 +41,8 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private final int PERMUTATIONS = 5; // Basic grid permutation iterations
     private final int LEVEL_OFFSET = 6;
     private final String CELL_ID = "Cell", BTN_ID = "Button", PREF_LVL = "Level";
+    private final Random random = new Random(System.currentTimeMillis());
     private SharedPreferences preferences;
-
     private TableLayout tableLayout; // Game field
     private LinearLayout linearLayout; // Controls layout
     private TextView tvLevel;
@@ -54,11 +53,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private ArrayList<Integer> hiddenCellsArray, firstRow;
     private int maxLevel = 7, currentLevel;
     private int moves;
-
     private int currentValue = 1;
-
-    private final Random random = new Random(System.currentTimeMillis());
-
     private Animation animation;
     private int cellWidth;
 
