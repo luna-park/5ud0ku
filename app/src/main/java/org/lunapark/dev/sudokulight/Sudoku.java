@@ -9,7 +9,7 @@ import java.util.Random;
  */
 public class Sudoku {
 
-    private static final int PERMUTATIONS = 5;
+    private static final int PERMUTATIONS = 7;
     private final ArrayList<Integer> firstRow;
     private final ArrayList<Integer> hiddenCellsArray;
     private int size = 9;
@@ -89,14 +89,27 @@ public class Sudoku {
         return sudoku;
     }
 
-    // TODO Check for right solution
+    // Check for right solution
     public boolean checkSolution() {
+        // Check by row
         for (int value = 1; value < size + 1; value++) {
 
             for (int i = 0; i < size; i++) {
                 int count = 0;
                 for (int j = 0; j < size; j++) {
                     if (sudoku[i][j] == value) count++;
+                }
+                if (count != 1) return false;
+            }
+        }
+
+        // Check by column
+        for (int value = 1; value < size + 1; value++) {
+
+            for (int i = 0; i < size; i++) {
+                int count = 0;
+                for (int j = 0; j < size; j++) {
+                    if (sudoku[j][i] == value) count++;
                 }
                 if (count != 1) return false;
             }
@@ -177,7 +190,7 @@ public class Sudoku {
     }
 
     /**
-     * Permutation - transpose sudoku matrix
+     * TODO Permutation - transpose sudoku matrix
      */
     private void transponse() {
 

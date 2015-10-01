@@ -45,7 +45,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private Sudoku sudoku;
     private int[][] sudokuSolution; // User grid
 
-    //private ArrayList<Integer> hiddenCellsArray, firstRow;
     private int maxLevel = 7, currentLevel;
     private int moves;
     private int currentValue = 1;
@@ -70,7 +69,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         cells = new Button[SIZE][SIZE];
         controls = new Button[SIZE];
         sudoku = new Sudoku(SIZE);
-        //sudokuSolution = sudoku.generateSudoku(currentLevel);
+
         createSudoku();
         createTable();
         createControls();
@@ -111,7 +110,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         sudokuSolution = sudoku.generateSudoku(currentLevel);
     }
 
-
     /**
      * Create game field
      */
@@ -151,7 +149,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
                 button.setGravity(Gravity.CENTER);
                 cells[i][j] = button;
                 tableRow.addView(button);
-
             }
             tableLayout.addView(tableRow);
         }
@@ -161,13 +158,11 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         sdBg.getPaint().setColor(getResources().getColor(R.color.field));
 
         ShapeDrawable sdGrid1 = new ShapeDrawable(new RectShape());
-
         sdGrid1.getPaint().setColor(Color.BLACK);
         sdGrid1.getPaint().setStyle(Paint.Style.STROKE);
         sdGrid1.getPaint().setStrokeWidth(5);
 
         ShapeDrawable sdGrid2 = new ShapeDrawable(new RectShape());
-
         sdGrid2.getPaint().setColor(Color.BLACK);
         sdGrid2.getPaint().setStyle(Paint.Style.STROKE);
         sdGrid2.getPaint().setStrokeWidth(5);
@@ -184,9 +179,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         tvLevel.setText(getString(R.string.title_level) + " " + (currentLevel - LEVEL_OFFSET));
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-
                 int value = sudokuSolution[i][j];
-
                 if (value != 0) {
                     cells[i][j].setText(String.valueOf(value));
                 } else {
@@ -213,22 +206,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             linearLayout.addView(button, layoutParams);
         }
         controls[0].setBackgroundResource(R.drawable.button_checked);
-
     }
-
-//    /**
-//     * Check for right solution
-//     *
-//     * @return
-//     */
-//    private boolean checkSolution() {
-//        for (int i = 0; i < SIZE; i++) {
-//            for (int j = 0; j < SIZE; j++) {
-//                if (sudoku[i][j] != sudokuSolution[i][j]) return false;
-//            }
-//        }
-//        return true;
-//    }
 
     private void showResult(boolean result) {
         createSudoku();
@@ -239,7 +217,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             // Victory
             iconId = android.R.drawable.btn_star_big_on;
             message = getString(R.string.title_victory);
-
         } else {
             // Fail
             iconId = android.R.drawable.ic_delete;
@@ -281,7 +258,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             }
         }
 
-
         if (moves == 0) {
             if (sudoku.checkSolution()) {
                 currentLevel++; // Level up
@@ -295,27 +271,14 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             }
         }
 
-//        if (sudoku.checkSolution()) {
-//            currentLevel++; // Level up
-//            if (currentLevel > maxLevel) {
-//                maxLevel = currentLevel;
-//                preferences.edit().putInt(PREF_LVL, maxLevel).apply();
-//            }
-//            showResult(true);
-//        } else if (moves == 0) {
-//
-//        }
-
         // Highlight controls
         for (int i = 0; i < SIZE; i++) {
             Button button = controls[i];
             if (button.getTag().equals(tag1)) {
                 currentValue = i + 1;
                 button.setBackgroundResource(R.drawable.button_checked);
-
             } else {
                 button.setBackgroundResource(R.drawable.button);
-
             }
         }
         highlights();
