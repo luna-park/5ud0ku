@@ -13,7 +13,6 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -29,28 +28,24 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-
 import static android.view.ViewGroup.LayoutParams;
 
 public class MainActivity extends Activity implements Button.OnClickListener {
 
     private final int SIZE = 9; // Field size
-    private final int PERMUTATIONS = 5; // Basic grid permutation iterations
     private final int LEVEL_OFFSET = 6;
-    private final String CELL_ID = "Cell", BTN_ID = "Button", PREF_LVL = "Level";
-    private final Random random = new Random(System.currentTimeMillis());
+    private String CELL_ID = "Cell", BTN_ID = "Button", PREF_LVL = "Level";
     private SharedPreferences preferences;
     private TableLayout tableLayout; // Game field
     private LinearLayout linearLayout; // Controls layout
     private TextView tvLevel;
     private Button[][] cells; // Cells in game field
     private Button[] controls;
-    private int[][] sudoku; // Generated grid
+
+    private Sudoku sudoku;
     private int[][] sudokuSolution; // User grid
-    private ArrayList<Integer> hiddenCellsArray, firstRow;
+
+    //private ArrayList<Integer> hiddenCellsArray, firstRow;
     private int maxLevel = 7, currentLevel;
     private int moves;
     private int currentValue = 1;
@@ -74,27 +69,14 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
         cells = new Button[SIZE][SIZE];
         controls = new Button[SIZE];
-        sudoku = new int[SIZE][SIZE];
-        sudokuSolution = new int[SIZE][SIZE];
-
-        hiddenCellsArray = new ArrayList<Integer>();
-        for (int i = 0; i < SIZE * SIZE; i++) {
-            hiddenCellsArray.add(i);
-        }
-
-        firstRow = new ArrayList<Integer>();
-        for (int i = 0; i < SIZE; i++) {
-            firstRow.add(i + 1);
-        }
-
+        sudoku = new Sudoku(SIZE);
+        //sudokuSolution = sudoku.generateSudoku(currentLevel);
         createSudoku();
         createTable();
         createControls();
-        tvLevel.setText(new StringBuilder().append(getString(R.string.title_level)).append(" ")
-                .append(currentLevel - LEVEL_OFFSET).toString());
+        tvLevel.setText(getString(R.string.title_level) + " " + (currentLevel - LEVEL_OFFSET));
         highlights();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -105,16 +87,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_new_game) {
-//
-//            return true;
-//        }
 
         switch (item.getItemId()) {
             case R.id.action_difficulty:
@@ -133,128 +105,10 @@ public class MainActivity extends Activity implements Button.OnClickListener {
      * Generate sudoku grid
      */
     private void createSudoku() {
-        Collections.shuffle(firstRow);
-        // 1st row
-        for (int i = 0; i < SIZE; i++) {
-            sudoku[0][i] = firstRow.get(i);
-        }
-
-        generateSudokuRow(0, 1, 3); // 2nd row
-        generateSudokuRow(1, 2, 3);
-
-        generateSudokuRow(0, 3, 1);
-        generateSudokuRow(3, 4, 3);
-        generateSudokuRow(4, 5, 3);
-
-        generateSudokuRow(3, 6, 1);
-        generateSudokuRow(6, 7, 3);
-        generateSudokuRow(7, 8, 3);
-
-        // Advanced permutation
-        for (int i = 0; i < PERMUTATIONS; i++) {
-            Log.d("5UD0KU", "PERMUTATION: " + i);
-            if (random.nextBoolean()) swapRowsSmall();
-            if (random.nextBoolean()) swapColumnsSmall();
-            if (random.nextBoolean()) swapRowsArea();
-            if (random.nextBoolean()) swapColumnsArea();
-        }
-
         moves = currentLevel;
 
         // Fill user data
-        for (int i = 0; i < SIZE; i++) {
-            System.arraycopy(sudoku[i], 0, sudokuSolution[i], 0, SIZE);
-        }
-
-
-        // Make hidden cells
-        Collections.shuffle(hiddenCellsArray);
-
-        for (int i = 0; i < currentLevel; i++) {
-            int a = hiddenCellsArray.get(i);
-            sudokuSolution[a % SIZE][a / SIZE] = 0;
-        }
-    }
-
-
-    private void generateSudokuRow(int rowSrc, int rowDst, int offset) {
-        for (int i = 0; i < SIZE; i++) {
-            int b = i + offset;
-            if (b >= SIZE) b -= SIZE;
-            sudoku[rowDst][i] = sudoku[rowSrc][b];
-        }
-    }
-
-    /**
-     * Permutation
-     */
-    private void swapRowsSmall() {
-        int row = random.nextInt(3) * 3;
-        Log.d("5UD0KU", "Swap rows small: " + row);
-        for (int i = 0; i < SIZE; i++) {
-            int b = sudoku[row][i];
-            sudoku[row][i] = sudoku[row + 2][i];
-            sudoku[row + 2][i] = b;
-        }
-    }
-
-    /**
-     * Permutation
-     */
-    private void swapColumnsSmall() {
-        int column = random.nextInt(3) * 3;
-        Log.d("5UD0KU", "Swap columns small: " + column);
-        for (int i = 0; i < SIZE; i++) {
-            int b = sudoku[i][column];
-            sudoku[i][column] = sudoku[i][column + 2];
-            sudoku[i][column + 2] = b;
-        }
-    }
-
-    /**
-     * Permutation
-     */
-    private void swapRowsArea() {
-        int row = random.nextInt(2) * 3;
-        Log.d("5UD0KU", "Swap rows area: " + row);
-        for (int i = 0; i < SIZE; i++) {
-            int a = sudoku[row][i];
-            int b = sudoku[row + 1][i];
-            int c = sudoku[row + 2][i];
-            sudoku[row][i] = sudoku[row + 3][i];
-            sudoku[row + 1][i] = sudoku[row + 4][i];
-            sudoku[row + 2][i] = sudoku[row + 5][i];
-            sudoku[row + 3][i] = a;
-            sudoku[row + 4][i] = b;
-            sudoku[row + 5][i] = c;
-        }
-    }
-
-    /**
-     * Permutation
-     */
-    private void swapColumnsArea() {
-        int column = random.nextInt(2) * 3;
-        Log.d("5UD0KU", "Swap columns area: " + column);
-        for (int i = 0; i < SIZE; i++) {
-            int a = sudoku[i][column];
-            int b = sudoku[i][column + 1];
-            int c = sudoku[i][column + 2];
-            sudoku[i][column] = sudoku[i][column + 3];
-            sudoku[i][column + 1] = sudoku[i][column + 4];
-            sudoku[i][column + 2] = sudoku[i][column + 5];
-            sudoku[i][column + 3] = a;
-            sudoku[i][column + 4] = b;
-            sudoku[i][column + 5] = c;
-        }
-    }
-
-    private boolean checkCell(int i, int j) {
-        for (int a = 0; a < currentLevel; a++) {
-            int b = j * SIZE + i;
-            if (hiddenCellsArray.get(a) == b) return false;
-        }
-        return true;
+        sudokuSolution = sudoku.generateSudoku(currentLevel);
     }
 
 
@@ -276,24 +130,22 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         float width = point.x - marginX;
         cellWidth = (int) (width / 9);
 
-        Log.d("SUDOKU", "Width : " + marginX);
-
         for (int i = 0; i < SIZE; i++) {
             // Add row
             TableRow tableRow = new TableRow(this);
             tableRow.setGravity(Gravity.CENTER_HORIZONTAL);
             for (int j = 0; j < SIZE; j++) {
                 Button button = new Button(this);
+                int value = sudokuSolution[i][j];
 
-                if (checkCell(i, j)) {
-                    button.setText(String.valueOf(sudoku[i][j]));
+                if (value != 0) {
+                    button.setText(String.valueOf(value));
                 } else {
                     button.setText(" ");
                 }
-                button.setGravity(1);
-
-                button.setOnClickListener(this);
                 button.setTag(CELL_ID + "," + i + j);
+                button.setGravity(1);
+                button.setOnClickListener(this);
                 button.setWidth(cellWidth);
                 button.setHeight(cellWidth);
                 button.setGravity(Gravity.CENTER);
@@ -304,7 +156,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             tableLayout.addView(tableRow);
         }
 
-        // TODO Add grid
+        // Add grid
         ShapeDrawable sdBg = new ShapeDrawable(new RectShape());
         sdBg.getPaint().setColor(getResources().getColor(R.color.field));
 
@@ -329,12 +181,14 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     }
 
     private void refreshTable() {
-        tvLevel.setText(new StringBuilder().append(getString(R.string.title_level)).append(" ")
-                .append(currentLevel - LEVEL_OFFSET).toString());
+        tvLevel.setText(getString(R.string.title_level) + " " + (currentLevel - LEVEL_OFFSET));
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                if (checkCell(i, j)) {
-                    cells[i][j].setText(String.valueOf(sudoku[i][j]));
+
+                int value = sudokuSolution[i][j];
+
+                if (value != 0) {
+                    cells[i][j].setText(String.valueOf(value));
                 } else {
                     cells[i][j].setText(" ");
                 }
@@ -350,8 +204,8 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
         for (int i = 0; i < SIZE; i++) {
             Button button = new Button(this);
-            button.setText(String.valueOf(i + 1));
             button.setTag(BTN_ID + "," + i);
+            button.setText(String.valueOf(i + 1));
             button.setOnClickListener(this);
             button.setHeight(cellWidth);
             button.setGravity(Gravity.CENTER);
@@ -362,56 +216,50 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
     }
 
-    /**
-     * TODO Check for right solution
-     *
-     * @return
-     */
-    private boolean checkSolution() {
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                if (sudoku[i][j] != sudokuSolution[i][j]) return false;
-            }
-        }
-        return true;
-    }
+//    /**
+//     * Check for right solution
+//     *
+//     * @return
+//     */
+//    private boolean checkSolution() {
+//        for (int i = 0; i < SIZE; i++) {
+//            for (int j = 0; j < SIZE; j++) {
+//                if (sudoku[i][j] != sudokuSolution[i][j]) return false;
+//            }
+//        }
+//        return true;
+//    }
 
     private void showResult(boolean result) {
         createSudoku();
         refreshTable();
+        int iconId;
+        String message;
         if (result) {
-            // TODO Victory
-            new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.btn_star_big_on)
-                    .setTitle(getString(R.string.app_name))
-                    .setMessage(getString(R.string.title_victory))
-                    .setPositiveButton(android.R.string.yes,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog,
-                                                    int which) {
+            // Victory
+            iconId = android.R.drawable.btn_star_big_on;
+            message = getString(R.string.title_victory);
 
-                                }
-
-                            }).show();
         } else {
-            // TODO Fail
-            new AlertDialog.Builder(this)
-                    .setIcon(android.R.drawable.ic_delete)
-                    .setTitle(getString(R.string.app_name))
-                    .setMessage(getString(R.string.title_fail))
-                    .setPositiveButton(android.R.string.yes,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog,
-                                                    int which) {
-
-                                }
-
-                            }).show();
+            // Fail
+            iconId = android.R.drawable.ic_delete;
+            message = getString(R.string.title_fail);
         }
-    }
 
+        new AlertDialog.Builder(this)
+                .setIcon(iconId)
+                .setTitle(message)
+                        //.setTitle(getString(R.string.app_name))
+                        //.setMessage(message)
+                .setPositiveButton(android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+                            }
+
+                        }).show();
+    }
 
     @Override
     public void onClick(View v) {
@@ -434,18 +282,30 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         }
 
 
-        if (checkSolution()) {
-            currentLevel++; // Level up
-            if (currentLevel > maxLevel) {
-                maxLevel = currentLevel;
-                preferences.edit().putInt(PREF_LVL, maxLevel).apply();
+        if (moves == 0) {
+            if (sudoku.checkSolution()) {
+                currentLevel++; // Level up
+                if (currentLevel > maxLevel) {
+                    maxLevel = currentLevel;
+                    preferences.edit().putInt(PREF_LVL, maxLevel).apply();
+                }
+                showResult(true);
+            } else {
+                showResult(false);
             }
-            showResult(true);
-        } else if (moves == 0) {
-            showResult(false);
         }
 
-        //} else {
+//        if (sudoku.checkSolution()) {
+//            currentLevel++; // Level up
+//            if (currentLevel > maxLevel) {
+//                maxLevel = currentLevel;
+//                preferences.edit().putInt(PREF_LVL, maxLevel).apply();
+//            }
+//            showResult(true);
+//        } else if (moves == 0) {
+//
+//        }
+
         // Highlight controls
         for (int i = 0; i < SIZE; i++) {
             Button button = controls[i];
@@ -457,11 +317,8 @@ public class MainActivity extends Activity implements Button.OnClickListener {
                 button.setBackgroundResource(R.drawable.button);
 
             }
-            //highlights();
-
         }
         highlights();
-        //}
     }
 
     private void highlights() {

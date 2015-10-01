@@ -1,7 +1,5 @@
 package org.lunapark.dev.sudokulight;
 
-//import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -18,6 +16,11 @@ public class Sudoku {
     private int[][] sudoku;
     private Random random;
 
+    /**
+     * Sudoku class constructor
+     *
+     * @param size - size of game field. Correct value is 9.
+     */
     public Sudoku(int size) {
         this.size = size;
         random = new Random(System.currentTimeMillis());
@@ -33,6 +36,11 @@ public class Sudoku {
         }
     }
 
+    /**
+     * Generate sudoku grid as a 2D-array int[][].
+     * @param currentLevel - quantity of hidden cells. Maximum value is 9x9 = 81
+     * @return - "zero cells" are hidden
+     */
     public int[][] generateSudoku(int currentLevel) {
 
         Collections.shuffle(firstRow);
@@ -81,6 +89,20 @@ public class Sudoku {
         return sudoku;
     }
 
+    // TODO Check for right solution
+    public boolean checkSolution() {
+        for (int value = 1; value < size + 1; value++) {
+
+            for (int i = 0; i < size; i++) {
+                int count = 0;
+                for (int j = 0; j < size; j++) {
+                    if (sudoku[i][j] == value) count++;
+                }
+                if (count != 1) return false;
+            }
+        }
+        return true;
+    }
 
     private void generateSudokuRow(int rowSrc, int rowDst, int offset) {
         for (int i = 0; i < size; i++) {
@@ -154,6 +176,9 @@ public class Sudoku {
         }
     }
 
+    /**
+     * Permutation - transpose sudoku matrix
+     */
     private void transponse() {
 
     }
