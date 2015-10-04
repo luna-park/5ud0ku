@@ -42,13 +42,15 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private Button[][] cells; // Cells in game field
     private Button[] controls;
 
+    private AlertDialog.Builder messageBox;
+
     private Sudoku sudoku;
     private int[][] sudokuSolution; // User grid
 
     private int maxLevel = 7, currentLevel;
     private int moves;
     private int currentValue = 1;
-    private Animation animation;
+    private Animation animationScale, animationRotate;
     private int cellWidth;
 
     @Override
@@ -64,7 +66,18 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         linearLayout = (LinearLayout) findViewById(R.id.llayout);
         tvLevel = (TextView) findViewById(R.id.tvLevel);
 
-        animation = AnimationUtils.loadAnimation(this, R.anim.anim_scale);
+        messageBox = new AlertDialog.Builder(this);
+        messageBox.setPositiveButton(android.R.string.yes,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog,
+                                        int which) {
+                    }
+
+                });
+
+        animationScale = AnimationUtils.loadAnimation(this, R.anim.anim_scale);
+        animationRotate = AnimationUtils.loadAnimation(this, R.anim.anim_rotate);
 
         cells = new Button[SIZE][SIZE];
         controls = new Button[SIZE];
@@ -73,7 +86,8 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         createSudoku();
         createTable();
         createControls();
-        tvLevel.setText(getString(R.string.title_level) + " " + (currentLevel - LEVEL_OFFSET));
+        refreshTable();
+        //tvLevel.setText(getString(R.string.title_level) + " " + (currentLevel - LEVEL_OFFSET));
         highlights();
     }
 
@@ -182,10 +196,12 @@ public class MainActivity extends Activity implements Button.OnClickListener {
                 int value = sudokuSolution[i][j];
                 if (value != 0) {
                     cells[i][j].setText(String.valueOf(value));
+                    cells[i][j].startAnimation(animationRotate);
                 } else {
                     cells[i][j].setText(" ");
                 }
                 cells[i][j].setBackgroundResource(R.drawable.button_selector);
+//                cells[i][j].startAnimation(animationRotate);
             }
         }
         highlights();
@@ -223,19 +239,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             message = getString(R.string.title_fail);
         }
 
-        new AlertDialog.Builder(this)
-                .setIcon(iconId)
-                .setTitle(message)
-                        //.setTitle(getString(R.string.app_name))
-                        //.setMessage(message)
-                .setPositiveButton(android.R.string.yes,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                                int which) {
-                            }
-
-                        }).show();
+        messageBox.setIcon(iconId).setTitle(message).show();
     }
 
     @Override
@@ -289,7 +293,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             for (int b = 0; b < SIZE; b++) {
                 if (sudokuSolution[a][b] == currentValue) {
                     cells[a][b].setTextColor(getResources().getColor(R.color.highlight_text));
-                    cells[a][b].startAnimation(animation);
+                    cells[a][b].startAnimation(animationScale);
                 } else {
                     cells[a][b].setTextColor(Color.BLACK);
                 }

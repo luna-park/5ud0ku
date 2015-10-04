@@ -9,7 +9,7 @@ import java.util.Random;
  */
 public class Sudoku {
 
-    private static final int PERMUTATIONS = 7;
+    private static final int PERMUTATIONS = 7; // Iterations of permutations
     private final ArrayList<Integer> firstRow;
     private final ArrayList<Integer> hiddenCellsArray;
     private int size = 9;
@@ -62,21 +62,13 @@ public class Sudoku {
 
         // Advanced permutation
         for (int i = 0; i < PERMUTATIONS; i++) {
-            // TODO Hide permutation
+            // TODO Hide permutation log
             System.out.println("PERMUTATION: " + i);
             if (random.nextBoolean()) swapRowsSmall();
             if (random.nextBoolean()) swapColumnsSmall();
             if (random.nextBoolean()) swapRowsArea();
             if (random.nextBoolean()) swapColumnsArea();
         }
-
-        //moves = currentLevel;
-
-        // Fill user data
-//        for (int i = 0; i < size; i++) {
-//            System.arraycopy(sudoku[i], 0, sudokuSolution[i], 0, size);
-//        }
-
 
         // Make hidden cells
         Collections.shuffle(hiddenCellsArray);
