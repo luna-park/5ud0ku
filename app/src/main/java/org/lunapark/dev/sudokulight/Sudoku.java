@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-/**
+/*
  * Created by znak on 01.10.2015.
  */
 public class Sudoku {
 
-    private static final int PERMUTATIONS = 7; // Iterations of permutations
+    private static final int PERMUTATIONS = 10; // Iterations of permutations
     private final ArrayList<Integer> firstRow;
     private final ArrayList<Integer> hiddenCellsArray;
     private int size = 9;
@@ -62,8 +62,8 @@ public class Sudoku {
 
         // Advanced permutation
         for (int i = 0; i < PERMUTATIONS; i++) {
-            // TODO Hide permutation log
-            System.out.println("PERMUTATION: " + i);
+            // Permutation log
+            //System.out.println("PERMUTATION: " + i);
             if (random.nextBoolean()) swapRowsSmall();
             if (random.nextBoolean()) swapColumnsSmall();
             if (random.nextBoolean()) swapRowsArea();

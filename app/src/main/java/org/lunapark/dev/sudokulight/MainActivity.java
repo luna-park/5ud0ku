@@ -33,12 +33,13 @@ import static android.view.ViewGroup.LayoutParams;
 public class MainActivity extends Activity implements Button.OnClickListener {
 
     private final int SIZE = 9; // Field size
-    private final int LEVEL_OFFSET = 6;
+    private final int LEVEL_OFFSET = 6; // Offset level value
+    private final int LEVELS = SIZE * SIZE - 1; // Maximum reachable level
     private String CELL_ID = "Cell", BTN_ID = "Button", PREF_LVL = "Level";
     private SharedPreferences preferences;
     private TableLayout tableLayout; // Game field
     private LinearLayout linearLayout; // Controls layout
-    private TextView tvLevel;
+    private TextView tvLevel, tvRank;
     private Button[][] cells; // Cells in game field
     private Button[] controls;
 
@@ -47,11 +48,14 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private Sudoku sudoku;
     private int[][] sudokuSolution; // User grid
 
+    private String[] ranks;
+
     private int maxLevel = 7, currentLevel;
-    private int moves;
+    private int moves, ranksLength;
     private int currentValue = 1;
     private Animation animationScale, animationRotate;
     private int cellWidth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +69,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         tableLayout = (TableLayout) findViewById(R.id.tlayout);
         linearLayout = (LinearLayout) findViewById(R.id.llayout);
         tvLevel = (TextView) findViewById(R.id.tvLevel);
+        tvRank = (TextView) findViewById(R.id.tvRank);
 
         messageBox = new AlertDialog.Builder(this);
         messageBox.setPositiveButton(android.R.string.yes,
@@ -82,6 +87,10 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         cells = new Button[SIZE][SIZE];
         controls = new Button[SIZE];
         sudoku = new Sudoku(SIZE);
+
+        ranksLength = getResources().getStringArray(R.array.ranks).length;
+        ranks = new String[ranksLength];
+        System.arraycopy(getResources().getStringArray(R.array.ranks), 0, ranks, 0, ranksLength);
 
         createSudoku();
         createTable();
@@ -190,7 +199,10 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     }
 
     private void refreshTable() {
-        tvLevel.setText(getString(R.string.title_level) + " " + (currentLevel - LEVEL_OFFSET));
+        int level = currentLevel - LEVEL_OFFSET;
+        tvLevel.setText(getString(R.string.title_level) + " " + (level));
+        // TODO Check for range
+        tvRank.setText(ranks[level / 10]);
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 int value = sudokuSolution[i][j];
@@ -262,9 +274,10 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             }
         }
 
+
         if (moves == 0) {
             if (sudoku.checkSolution()) {
-                currentLevel++; // Level up
+                if (currentLevel < LEVELS) currentLevel++; // Level up
                 if (currentLevel > maxLevel) {
                     maxLevel = currentLevel;
                     preferences.edit().putInt(PREF_LVL, maxLevel).apply();
@@ -287,6 +300,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         }
         highlights();
     }
+
 
     private void highlights() {
         for (int a = 0; a < SIZE; a++) {
@@ -391,4 +405,5 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         difficultyDialog.create();
         difficultyDialog.show();
     }
+
 }

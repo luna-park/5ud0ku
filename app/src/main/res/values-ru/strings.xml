@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">5UD0KU</string>
+    <string name="action_difficulty">Уровень сложности</string>
+    <string name="action_new_game">Перезапуск </string>
+    <string name="title_fail">Неудача...</string>
+    <string name="title_level">Уровень:</string>
+    <string name="title_quit">Выход?</string>
+    <string name="title_victory">Победа!</string>
+    <string-array name="ranks">
+        <item>Новичок</item>
+        <item>Знающий</item>
+        <item>Опытный</item>
+        <item>Продвинутый</item>
+        <item>Эксперт</item>
+        <item>Мастер</item>
+        <item>Генератор</item>
+    </string-array>
+</resources>
