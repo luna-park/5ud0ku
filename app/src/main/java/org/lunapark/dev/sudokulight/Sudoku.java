@@ -82,14 +82,14 @@ public class Sudoku {
     }
 
     // Check for right solution
-    public boolean checkSolution() {
+    public boolean checkSolution(int[][] sudokuArray) {
         // Check by row
         for (int value = 1; value < size + 1; value++) {
 
             for (int i = 0; i < size; i++) {
                 int count = 0;
                 for (int j = 0; j < size; j++) {
-                    if (sudoku[i][j] == value) count++;
+                    if (sudokuArray[i][j] == value) count++;
                 }
                 if (count != 1) return false;
             }
@@ -101,7 +101,7 @@ public class Sudoku {
             for (int i = 0; i < size; i++) {
                 int count = 0;
                 for (int j = 0; j < size; j++) {
-                    if (sudoku[j][i] == value) count++;
+                    if (sudokuArray[j][i] == value) count++;
                 }
                 if (count != 1) return false;
             }

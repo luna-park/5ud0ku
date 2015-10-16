@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
@@ -35,15 +36,16 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private final int SIZE = 9; // Field size
     private final int LEVEL_OFFSET = 6; // Offset level value
     private final int LEVELS = SIZE * SIZE - 1; // Maximum reachable level
-    private String CELL_ID = "Cell", BTN_ID = "Button", PREF_LVL = "Level";
+    private String CELL_ID = "Cell", BTN_ID = "Button", PREF_LVL = "Level", PREF_DATA = "Game data", PREF_POS = "Pos";
     private SharedPreferences preferences;
     private TableLayout tableLayout; // Game field
-    private LinearLayout linearLayout; // Controls layout
+    private GridLayout controlsLayout; // Controls layout
     private TextView tvLevel, tvRank;
     private Button[][] cells; // Cells in game field
     private Button[] controls;
 
     private AlertDialog.Builder messageBox;
+    private AlertDialog.Builder difficultyDialog;
 
     private Sudoku sudoku;
     private int[][] sudokuSolution; // User grid
@@ -52,10 +54,9 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
     private int maxLevel = 7, currentLevel;
     private int moves, ranksLength;
-    private int currentValue = 1;
+    private int currentValue;
     private Animation animationScale, animationRotate;
     private int cellWidth;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         currentLevel = maxLevel;
 
         tableLayout = (TableLayout) findViewById(R.id.tlayout);
-        linearLayout = (LinearLayout) findViewById(R.id.llayout);
+        controlsLayout = (GridLayout) findViewById(R.id.controlsLayout);
         tvLevel = (TextView) findViewById(R.id.tvLevel);
         tvRank = (TextView) findViewById(R.id.tvRank);
 
@@ -81,6 +82,8 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
                 });
 
+        difficultyDialog = new AlertDialog.Builder(this);
+
         animationScale = AnimationUtils.loadAnimation(this, R.anim.anim_scale);
         animationRotate = AnimationUtils.loadAnimation(this, R.anim.anim_rotate);
 
@@ -92,11 +95,11 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         ranks = new String[ranksLength];
         System.arraycopy(getResources().getStringArray(R.array.ranks), 0, ranks, 0, ranksLength);
 
-        createSudoku();
+        loadSudoku();
+
         createTable();
         createControls();
         refreshTable();
-        //tvLevel.setText(getString(R.string.title_level) + " " + (currentLevel - LEVEL_OFFSET));
         highlights();
     }
 
@@ -128,9 +131,9 @@ public class MainActivity extends Activity implements Button.OnClickListener {
      */
     private void createSudoku() {
         moves = currentLevel;
-
         // Fill user data
         sudokuSolution = sudoku.generateSudoku(currentLevel);
+        saveSudoku();
     }
 
     /**
@@ -148,7 +151,12 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
         float dpi = displayMetrics.density;
         float marginX = (getResources().getDimension(R.dimen.activity_horizontal_margin)) * dpi;
-        float width = point.x - marginX;
+        float width;
+        if (point.x < point.y) {
+            width = point.x - marginX;
+        } else {
+            width = point.y - marginX;
+        }
         cellWidth = (int) (width / 9);
 
         for (int i = 0; i < SIZE; i++) {
@@ -213,7 +221,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
                     cells[i][j].setText(" ");
                 }
                 cells[i][j].setBackgroundResource(R.drawable.button_selector);
-//                cells[i][j].startAnimation(animationRotate);
             }
         }
         highlights();
@@ -229,11 +236,14 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             button.setText(String.valueOf(i + 1));
             button.setOnClickListener(this);
             button.setHeight(cellWidth);
+            button.setWidth(cellWidth);
+
             button.setGravity(Gravity.CENTER);
             controls[i] = button;
-            linearLayout.addView(button, layoutParams);
+            controlsLayout.addView(button, layoutParams);
         }
-        controls[0].setBackgroundResource(R.drawable.button_checked);
+//        int pos = preferences.getInt(PREF_POS, 1);
+        controls[currentValue - 1].setBackgroundResource(R.drawable.button_checked);
     }
 
     private void showResult(boolean result) {
@@ -268,6 +278,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
                     button.setBackgroundResource(R.drawable.button_checked);
                     sudokuSolution[i][j] = currentValue;
                     moves--;
+                    saveSudoku();
                 } else {
                     button.setBackgroundResource(R.drawable.button_selector);
                 }
@@ -276,7 +287,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
 
 
         if (moves == 0) {
-            if (sudoku.checkSolution()) {
+            if (sudoku.checkSolution(sudokuSolution)) {
                 if (currentLevel < LEVELS) currentLevel++; // Level up
                 if (currentLevel > maxLevel) {
                     maxLevel = currentLevel;
@@ -299,6 +310,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
             }
         }
         highlights();
+        preferences.edit().putInt(PREF_POS, currentValue).apply();
     }
 
 
@@ -353,8 +365,6 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     }
 
     private void showDifficultyDialog() {
-        final AlertDialog.Builder difficultyDialog = new AlertDialog.Builder(this);
-
         //difficultyDialog.setIcon(android.R.drawable.btn_star);
         difficultyDialog.setTitle(R.string.action_difficulty);
 
@@ -406,4 +416,37 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         difficultyDialog.show();
     }
 
+    // Save & load sudoku
+    private void saveSudoku() {
+        StringBuilder data = new StringBuilder();
+
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                data.append(sudokuSolution[i][j]);
+            }
+        }
+
+        preferences.edit().putString(PREF_DATA, data.toString()).apply();
+    }
+
+    // Load (moves)
+    private void loadSudoku() {
+        String data = preferences.getString(PREF_DATA, "");
+        if (data.isEmpty()) {
+            createSudoku();
+        } else {
+            sudokuSolution = new int[SIZE][SIZE];
+            int n = 0;
+            moves = 0;
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j < SIZE; j++) {
+                    int value = (int) (data.charAt(n)) - 48;
+                    sudokuSolution[i][j] = value;
+                    if (value == 0) moves++;
+                    n++;
+                }
+            }
+        }
+        currentValue = preferences.getInt(PREF_POS, 1);
+    }
 }
