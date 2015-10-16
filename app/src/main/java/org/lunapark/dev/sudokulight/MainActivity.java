@@ -40,7 +40,7 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     private SharedPreferences preferences;
     private TableLayout tableLayout; // Game field
     private GridLayout controlsLayout; // Controls layout
-    private TextView tvLevel, tvRank;
+    private TextView tvLevel, tvRank, tvOptions;
     private Button[][] cells; // Cells in game field
     private Button[] controls;
 
@@ -71,6 +71,9 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         controlsLayout = (GridLayout) findViewById(R.id.controlsLayout);
         tvLevel = (TextView) findViewById(R.id.tvLevel);
         tvRank = (TextView) findViewById(R.id.tvRank);
+        tvOptions = (TextView) findViewById(R.id.tvOptions);
+
+        tvOptions.setOnClickListener(this);
 
         messageBox = new AlertDialog.Builder(this);
         messageBox.setPositiveButton(android.R.string.yes,
@@ -101,6 +104,8 @@ public class MainActivity extends Activity implements Button.OnClickListener {
         createControls();
         refreshTable();
         highlights();
+
+
     }
 
     @Override
@@ -267,50 +272,55 @@ public class MainActivity extends Activity implements Button.OnClickListener {
     @Override
     public void onClick(View v) {
         Object tag1 = v.getTag();
-        String[] ID = tag1.toString().split(",");
-        // Highlight cell
-        //if (ID[0].equals(CELL_ID)) {
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                Button button = cells[i][j];
-                if (button.getTag().equals(tag1) && sudokuSolution[i][j] == 0) {
-                    button.setText(String.valueOf(currentValue));
-                    button.setBackgroundResource(R.drawable.button_checked);
-                    sudokuSolution[i][j] = currentValue;
-                    moves--;
-                    saveSudoku();
+
+        if (tag1 == null) {
+            this.openOptionsMenu();
+        } else {
+            String[] ID = tag1.toString().split(",");
+            // Highlight cell
+            //if (ID[0].equals(CELL_ID)) {
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j < SIZE; j++) {
+                    Button button = cells[i][j];
+                    if (button.getTag().equals(tag1) && sudokuSolution[i][j] == 0) {
+                        button.setText(String.valueOf(currentValue));
+                        button.setBackgroundResource(R.drawable.button_checked);
+                        sudokuSolution[i][j] = currentValue;
+                        moves--;
+                        saveSudoku();
+                    } else {
+                        button.setBackgroundResource(R.drawable.button_selector);
+                    }
+                }
+            }
+
+
+            if (moves == 0) {
+                if (sudoku.checkSolution(sudokuSolution)) {
+                    if (currentLevel < LEVELS) currentLevel++; // Level up
+                    if (currentLevel > maxLevel) {
+                        maxLevel = currentLevel;
+                        preferences.edit().putInt(PREF_LVL, maxLevel).apply();
+                    }
+                    showResult(true);
                 } else {
-                    button.setBackgroundResource(R.drawable.button_selector);
+                    showResult(false);
                 }
             }
-        }
 
-
-        if (moves == 0) {
-            if (sudoku.checkSolution(sudokuSolution)) {
-                if (currentLevel < LEVELS) currentLevel++; // Level up
-                if (currentLevel > maxLevel) {
-                    maxLevel = currentLevel;
-                    preferences.edit().putInt(PREF_LVL, maxLevel).apply();
+            // Highlight controls
+            for (int i = 0; i < SIZE; i++) {
+                Button button = controls[i];
+                if (button.getTag().equals(tag1)) {
+                    currentValue = i + 1;
+                    button.setBackgroundResource(R.drawable.button_checked);
+                } else {
+                    button.setBackgroundResource(R.drawable.button);
                 }
-                showResult(true);
-            } else {
-                showResult(false);
             }
+            highlights();
+            preferences.edit().putInt(PREF_POS, currentValue).apply();
         }
-
-        // Highlight controls
-        for (int i = 0; i < SIZE; i++) {
-            Button button = controls[i];
-            if (button.getTag().equals(tag1)) {
-                currentValue = i + 1;
-                button.setBackgroundResource(R.drawable.button_checked);
-            } else {
-                button.setBackgroundResource(R.drawable.button);
-            }
-        }
-        highlights();
-        preferences.edit().putInt(PREF_POS, currentValue).apply();
     }
 
 
